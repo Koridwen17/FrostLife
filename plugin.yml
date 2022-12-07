@@ -1,0 +1,22 @@
+name: FrostLife
+version: '3.0.0'
+main: me.koridwen.frostlife.FrostLife
+api-version: 1.19
+authors: [Xcalibur8 , Koridwen]
+
+commands:
+  frostlife:
+    aliases: [ fl ]
+  givelife:
+  toggleexplanations:
+
+permissions:
+  frostlife.manager:
+    description: Allows full access to all commands
+    default: op
+  frostlife.bypass:
+    description: Player with this permission will not be effected by LastLife
+    default: false
+  frostlife.givelife:
+    description: Allows a player to give their lives to another player
+    default: true

@@ -1,0 +1,14 @@
+target/
+bin/
+out/
+/FrostLife.iml
+.externalToolBuilders/
+/.gitattributes
+/data.yml
+.idea/artifacts/
+.idea/ant.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/uiDesigner.xml
+.idea/vcs.xml
+.idea/workspace.xml
