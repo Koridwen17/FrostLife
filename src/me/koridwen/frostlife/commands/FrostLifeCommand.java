@@ -1,22 +1,18 @@
 package me.koridwen.frostlife.commands;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import me.koridwen.frostlife.FrostLife;
-//import me.koridwen.frostlife.GUI.MainGUI;
-//import me.koridwen.frostlife.services.BoogeymenManager;
 import me.koridwen.frostlife.services.FrostbiteManager;
 import me.koridwen.frostlife.services.LifeManager;
 import me.koridwen.frostlife.services.Messages;
-//import me.koridwen.frostlife.services.SoulBindManager;
+import me.koridwen.frostlife.services.NameTag;
 import me.koridwen.frostlife.util.StringManipulator;
-import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.UUID;
+
+import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -24,8 +20,9 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 public class FrostLifeCommand implements CommandExecutor, TabCompleter {
-    private List<String> arguments = new ArrayList();
-    private List<String> secondArguments = new ArrayList();
+    private List<String> arguments = new ArrayList<>();
+    private List<String> secondArguments = new ArrayList<>();
+    private List<String> thirdArguments = new ArrayList<>();
 
     public FrostLifeCommand() {
         FrostLife.getInstance().getCommand("frostlife").setExecutor(this);
@@ -51,7 +48,8 @@ public class FrostLifeCommand implements CommandExecutor, TabCompleter {
                             w.getWorldBorder().setCenter(w.getSpawnLocation());
                             w.getWorldBorder().setSize((double)FrostLife.worldBorder);
                             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', FrostLife.prefix + " enabled successfully"));
-                        } else {
+                        }
+                        else {
                             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', FrostLife.prefix + " disabled successfully"));
                             w.getWorldBorder().setSize(6.0E7);
 
@@ -98,6 +96,7 @@ public class FrostLifeCommand implements CommandExecutor, TabCompleter {
                         if (!FrostLife.hasSessionRunning)
                             sender.sendMessage(ChatColor.RED + "No session is currently running");
                         else FrostLife.getInstance().endSession();
+                        return true;
                     }
 
                     if (args[0].equalsIgnoreCase("setSpawn")) {
@@ -130,13 +129,10 @@ public class FrostLifeCommand implements CommandExecutor, TabCompleter {
                                 target.sendMessage(Bukkit.getPlayer(FrostLife.frostbitten).getName());
                             else target.sendMessage("no one is cursed yet");
                         }
+                        return true;
                     }
 
-                    if (args[0].equalsIgnoreCase("getLives") && args.length == 2) {
-                        Player p = Bukkit.getPlayer(args[1]);
-                        target.sendMessage(FrostLife.lives.get(p.getUniqueId()).toString());
-                        target.sendMessage(FrostbiteManager.frostbiteQueue.toString());
-                    }
+
 
                     if (args[0].equalsIgnoreCase("setCurse") && args.length == 2) {
                         Player p = Bukkit.getPlayer(args[1]);
@@ -175,7 +171,7 @@ public class FrostLifeCommand implements CommandExecutor, TabCompleter {
                 }
             }
             else {
-                if (args.length <= 0) {
+                if (args.length == 0) {
                     sender.sendMessage(ChatColor.RED + "This is a player only command");
                     return false;
                 }
@@ -193,64 +189,85 @@ public class FrostLifeCommand implements CommandExecutor, TabCompleter {
                 if (args[0].equalsIgnoreCase("reset")) {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', FrostLife.prefix + " Reset Complete"));
                     FrostLife.getInstance().reset();
+                    return true;
                 }
             }
-            else if (args.length == 2) {
-                OfflinePlayer op;
-                if (args[0].equalsIgnoreCase("addlife")) {
-                    target = Bukkit.getPlayer(args[1]);
-                    if (target == null) {
-                        op = Bukkit.getOfflinePlayer(args[1]);
-                        if (op.hasPlayedBefore() && FrostLife.lives.containsKey(op.getUniqueId())) {
-                            this.addLifeToOfflinePlayer(sender, op);
-                        } else {
-                            sender.sendMessage(ChatColor.RED + "Invalid player name");
-                        }
 
+            else if (args.length >= 2) {
+                if (args[0].equalsIgnoreCase("debug")) {
+                    if (args[1].equalsIgnoreCase("savedata")) {
+                        FrostLife.getInstance().data.loadDataToFile();
+                        sender.sendMessage(ChatColor.GREEN + "data saved");
+                        return true;
+                    }
+                    if (args[1].equalsIgnoreCase("registerteams")) {
+                        NameTag.registerNameTags();
+                        for (UUID uuid : FrostLife.lives.keySet()) {
+                            LifeManager.setLife(Bukkit.getPlayer(uuid),FrostLife.lives.get(uuid));
+                        }
+                        sender.sendMessage(ChatColor.GREEN + "teams registered");
+                        return true;
+                    }
+                    if (args[1].equalsIgnoreCase("getLives") && args.length == 3) {
+                        Player p = Bukkit.getPlayer(args[2]);
+                        sender.sendMessage(FrostLife.lives.get(p.getUniqueId()).toString());
                         return true;
                     }
 
-                    this.addLifeToOnlinePlayer(sender, target);
-                }
-
-                if (args[0].equalsIgnoreCase("removelife")) {
-                    target = Bukkit.getPlayer(args[1]);
-                    if (target == null) {
-                        op = Bukkit.getOfflinePlayer(args[1]);
-                        if (op.hasPlayedBefore() && FrostLife.lives.containsKey(op.getUniqueId())) {
-                            this.removeLifeFromOfflinePlayer(sender, op);
-                        } else {
-                            sender.sendMessage(ChatColor.RED + "Invalid player name");
-                        }
-
-                        return true;
-                    }
-
-                    this.removeLifeFromOnlinePlayer(sender, target);
-                }
-
-                if (args[0].equalsIgnoreCase("randomizelife")) {
-                    if (args[1].equals("@a")) {
-                        Iterator var9 = Bukkit.getOnlinePlayers().iterator();
-
-                        while(var9.hasNext()) {
-                            Player p = (Player)var9.next();
-                            if (!p.hasPermission("frostlife.bypass")) {
-                                LifeManager.setPlayerToRandomLife(p);
+                    OfflinePlayer op;
+                    if (args[1].equalsIgnoreCase("addlife")) {
+                        target = Bukkit.getPlayer(args[1]);
+                        if (target == null) {
+                            op = Bukkit.getOfflinePlayer(args[1]);
+                            if (op.hasPlayedBefore() && FrostLife.lives.containsKey(op.getUniqueId())) {
+                                this.addLifeToOfflinePlayer(sender, op);
+                            } else {
+                                sender.sendMessage(ChatColor.RED + "Invalid player name");
                             }
+
+                            return true;
                         }
 
-                        sender.sendMessage(ChatColor.GREEN + "Randomizing all online players life count...");
-                        return true;
+                        this.addLifeToOnlinePlayer(sender, target);
                     }
+                    if (args[1].equalsIgnoreCase("removelife")) {
+                        target = Bukkit.getPlayer(args[1]);
+                        if (target == null) {
+                            op = Bukkit.getOfflinePlayer(args[1]);
+                            if (op.hasPlayedBefore() && FrostLife.lives.containsKey(op.getUniqueId())) {
+                                this.removeLifeFromOfflinePlayer(sender, op);
+                            } else {
+                                sender.sendMessage(ChatColor.RED + "Invalid player name");
+                            }
 
-                    target = Bukkit.getPlayer(args[1]);
-                    if (target != null) {
-                        if (!target.hasPermission("frostlife.bypass")) {
-                            LifeManager.setPlayerToRandomLife(target);
-                            sender.sendMessage(ChatColor.GREEN + "Randomizing " + ChatColor.GOLD + target.getName() + "'s" + ChatColor.GREEN + " life count...");
-                        } else {
-                            sender.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.RED + " has bypassed the command");
+                            return true;
+                        }
+
+                        this.removeLifeFromOnlinePlayer(sender, target);
+                    }
+                    if (args[0].equalsIgnoreCase("randomizelife")) {
+                        if (args[1].equals("@a")) {
+                            Iterator var9 = Bukkit.getOnlinePlayers().iterator();
+
+                            while(var9.hasNext()) {
+                                Player p = (Player)var9.next();
+                                if (!p.hasPermission("frostlife.bypass")) {
+                                    LifeManager.setPlayerToRandomLife(p);
+                                }
+                            }
+
+                            sender.sendMessage(ChatColor.GREEN + "Randomizing all online players life count...");
+                            return true;
+                        }
+
+                        target = Bukkit.getPlayer(args[1]);
+                        if (target != null) {
+                            if (!target.hasPermission("frostlife.bypass")) {
+                                LifeManager.setPlayerToRandomLife(target);
+                                sender.sendMessage(ChatColor.GREEN + "Randomizing " + ChatColor.GOLD + target.getName() + "'s" + ChatColor.GREEN + " life count...");
+                            } else {
+                                sender.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.RED + " has bypassed the command");
+                            }
                         }
                     }
                 }
@@ -396,64 +413,66 @@ public class FrostLifeCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
-        if (this.arguments.isEmpty() && args.length == 1) {
-            this.arguments.add("toggleexplanations");
-            if (sender.hasPermission("frostlife.manager") || sender.isOp()) {
-                this.arguments.add("enable");
-                this.arguments.add("startsession");
-                this.arguments.add("endsession");
-                this.arguments.add("curse");
-                //this.arguments.add("setSpawn");
-                //this.arguments.add("setBorder");
-                this.arguments.add("addLife");
-                this.arguments.add("removeLife");
-            }
+        if (this.arguments.isEmpty() && (sender.hasPermission("frostlife.manager") || sender.isOp()) && args.length == 1) {
+            this.arguments.add("enable");
+            this.arguments.add("startsession");
+            this.arguments.add("endsession");
+            this.arguments.add("curse");
+            this.arguments.add("debug");
+            this.arguments.add("addLife");
+            this.arguments.add("removeLife");
+            return this.arguments;
         }
 
-        if (this.arguments.isEmpty() && (sender.hasPermission("frostlife.manager") || sender.isOp()) && args.length == 1) {
-            //this.arguments.add("enable");
-            //this.arguments.add("reload");
-            //this.arguments.add("reset");
-            //this.arguments.add("randomizeLife");
-            //this.arguments.add("randomizeSoulBindings");
-            //this.arguments.add("pickBoogeymen");
-            //this.arguments.add("GUI");
-            //if (ConfigManager.enableTpOnDeath()) {
-            //    this.arguments.add("setspectatorspawnpoint");
-            //}
-        }
-        if (args.length == 2 && args[0].equalsIgnoreCase("curse")) {
+        else if (args.length == 2 && args[0].equalsIgnoreCase("curse")) {
             this.secondArguments.clear();
             this.secondArguments.add("roll");
             this.secondArguments.add("strike");
             this.secondArguments.add("getFrostbitten");
+            return this.secondArguments;
         }
 
-        if (args.length == 2 && args[0].equalsIgnoreCase("randomizelife")) {
+        else if (args.length == 2 && args[0].equalsIgnoreCase("debug")) {
             this.secondArguments.clear();
-            Iterator var8 = Bukkit.getOnlinePlayers().iterator();
-
-            while(var8.hasNext()) {
-                Player p = (Player)var8.next();
-                this.secondArguments.add(p.getName());
-            }
-
-            this.secondArguments.add("@a");
+            this.secondArguments.add("savedata");
+            this.secondArguments.add("registerteams");
+            this.secondArguments.add("getlives");
+            this.secondArguments.add("addlife");
+            this.secondArguments.add("removelife");
+            this.secondArguments.add("randomizelife");
             return this.secondArguments;
-        } else {
-            List<String> result = new ArrayList();
-            if (args.length == 1) {
-                Iterator var6 = this.arguments.iterator();
+        }
+        else if (args.length == 3 && args[0].equalsIgnoreCase("debug")) {
+            if (args[1].equalsIgnoreCase("getLives") || args[1].equalsIgnoreCase("addlife") ||  args[1].equalsIgnoreCase("removelife")){
+                this.thirdArguments.clear();
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    this.thirdArguments.add(p.getName());
+                }
+                return this.thirdArguments;
+            }
+            if (args[1].equalsIgnoreCase("randomizelife")) {
+                this.thirdArguments.clear();
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    this.thirdArguments.add(p.getName());
+                }
+                this.thirdArguments.add("@a");
+                return this.thirdArguments;
+            }
+            return null;
 
-                while(var6.hasNext()) {
-                    String arg = (String)var6.next();
+        }
+
+        else {
+            List<String> result = new ArrayList<>();
+            if (args.length == 1) {
+                for (String arg : this.arguments) {
                     if (arg.toLowerCase().startsWith(args[0].toLowerCase())) {
                         result.add(arg);
                     }
                 }
-
                 return result;
-            } else {
+            }
+            else {
                 return null;
             }
         }
