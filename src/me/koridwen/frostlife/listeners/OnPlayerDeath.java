@@ -23,14 +23,16 @@ public class OnPlayerDeath implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onDeath(PlayerDeathEvent event) {
         Player p = event.getEntity();
-        if (FrostLife.enabled && !p.hasPermission("frostlife.bypass")) {
+        Bukkit.broadcastMessage("test death 1");
+        if (FrostLife.hasSessionRunning && !p.hasPermission("frostlife.bypass")) {
             if (FrostLife.lives.get(p.getUniqueId()) > 0) {
                 if (FrostLife.lives.get(p.getUniqueId()) == 1) {
                     p.getWorld().strikeLightningEffect(p.getLocation());
                 }
                 (new BukkitRunnable() {
                     public void run() {
-                        LifeManager.setLife(p, (Integer) FrostLife.lives.get(p.getUniqueId()) - 1);
+                        LifeManager.setLife(p, FrostLife.lives.get(p.getUniqueId()) - 1);
+                        Bukkit.broadcastMessage("test death 2");
                     }
                 }).runTaskLater(FrostLife.getInstance(), 20L);
 

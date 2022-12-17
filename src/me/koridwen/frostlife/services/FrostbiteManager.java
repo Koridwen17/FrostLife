@@ -35,12 +35,14 @@ public class FrostbiteManager {
         }
 
         //putting the curse on someone random
-        (new BukkitRunnable() {
+        if (infectRandom())
+            startCurse();
+        /*(new BukkitRunnable() {
             public void run() {
                 if (infectRandom())
                     startCurse();
             }
-        }).runTaskLater(FrostLife.getInstance(),200L);
+        }).runTaskLater(FrostLife.getInstance(),200L);*/
 
         //planning curse strike
         (new BukkitRunnable() {

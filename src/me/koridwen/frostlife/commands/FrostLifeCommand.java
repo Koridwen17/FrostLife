@@ -45,13 +45,15 @@ public class FrostLifeCommand implements CommandExecutor, TabCompleter {
                     if (args[0].equalsIgnoreCase("enable")) {
                         if (!FrostLife.enabled) {
                             FrostLife.getInstance().enable();
-                            w.getWorldBorder().setCenter(w.getSpawnLocation());
-                            w.getWorldBorder().setSize((double)FrostLife.worldBorder);
+                            //w.getWorldBorder().setCenter(w.getSpawnLocation());
+                            //w.getWorldBorder().setSize((double)FrostLife.worldBorder);
                             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', FrostLife.prefix + " enabled successfully"));
                         }
-                        else {
+                        else
+                            sender.sendMessage("already enabled");
+                       /* else {
                             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', FrostLife.prefix + " disabled successfully"));
-                            w.getWorldBorder().setSize(6.0E7);
+                            //w.getWorldBorder().setSize(6.0E7);
 
                             Player all;
                             for(Iterator var13 = Bukkit.getOnlinePlayers().iterator(); var13.hasNext(); all.setPlayerListName(all.getName())) {
@@ -78,12 +80,16 @@ public class FrostLifeCommand implements CommandExecutor, TabCompleter {
                             }
 
                             FrostLife.enabled = false;
-                        }
+                        }*/
 
                         return true;
                     }
 
                     if (args[0].equalsIgnoreCase("startSession")) {
+                        if (!FrostLife.enabled) {
+                            FrostLife.getInstance().enable();
+                            FrostLife.getInstance().data.loadDataToFile();
+                        }
                         if (FrostLife.hasSessionRunning)
                             sender.sendMessage(ChatColor.RED + "A session is already running");
                         else {

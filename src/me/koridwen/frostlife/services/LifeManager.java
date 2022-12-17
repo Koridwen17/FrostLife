@@ -5,10 +5,8 @@ package me.koridwen.frostlife.services;
 import me.koridwen.frostlife.FrostLife;
 import java.util.ArrayList;
 import java.util.Collections;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Sound;
+
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -32,17 +30,21 @@ public class LifeManager {
             if (life >= 0) {
                 if (FrostLife.s.getTeam("firstlife").getEntries().contains(p.getName())) {
                     FrostLife.s.getTeam("firstlife").removeEntry(p.getName());
-                } else if (FrostLife.s.getTeam("secondlife").getEntries().contains(p.getName())) {
+                }
+                else if (FrostLife.s.getTeam("secondlife").getEntries().contains(p.getName())) {
                     FrostLife.s.getTeam("secondlife").removeEntry(p.getName());
-                } else if (FrostLife.s.getTeam("thirdlife").getEntries().contains(p.getName())) {
+                }
+                else if (FrostLife.s.getTeam("thirdlife").getEntries().contains(p.getName())) {
                     FrostLife.s.getTeam("thirdlife").removeEntry(p.getName());
-                } else if (FrostLife.s.getTeam("spectator").getEntries().contains(p.getName())) {
+                }
+                else if (FrostLife.s.getTeam("spectator").getEntries().contains(p.getName())) {
                     FrostLife.s.getTeam("spectator").removeEntry(p.getName());
                 }
 
                 if (p.hasPermission("frostlife.bypass")) {
                     p.setPlayerListName(ChatColor.WHITE + p.getName());
-                } else if (life > 3) {
+                }
+                else if (life > 3) {
                     FrostLife.lives.remove(p.getUniqueId());
                     FrostLife.lives.put(p.getUniqueId(), life);
                     p.setPlayerListName(ChatColor.WHITE + p.getName());
@@ -51,7 +53,8 @@ public class LifeManager {
                         p.setPlayerListName(extraLivesColor + p.getName());
                     }
 
-                } else if (life == 3) {
+                }
+                else if (life == 3) {
                     FrostLife.lives.remove(p.getUniqueId());
                     FrostLife.lives.put(p.getUniqueId(), life);
                     p.setPlayerListName(ChatColor.WHITE + p.getName());
@@ -60,7 +63,8 @@ public class LifeManager {
                         p.setPlayerListName(firstLifeColor + p.getName());
                     }
 
-                } else if (life == 2) {
+                }
+                else if (life == 2) {
                     FrostLife.lives.remove(p.getUniqueId());
                     FrostLife.lives.put(p.getUniqueId(), life);
                     p.setPlayerListName(ChatColor.WHITE + p.getName());
@@ -69,7 +73,8 @@ public class LifeManager {
                         p.setPlayerListName(secondLifeColor + p.getName());
                     }
 
-                } else if (life == 1) {
+                }
+                else if (life == 1) {
                     FrostLife.lives.remove(p.getUniqueId());
                     FrostLife.lives.put(p.getUniqueId(), life);
                     p.setPlayerListName(ChatColor.WHITE + p.getName());
@@ -78,19 +83,18 @@ public class LifeManager {
                         p.setPlayerListName(thirdLifeColor + p.getName());
                     }
 
-                } else {
-                    if (life == 0) {
-                        FrostLife.lives.remove(p.getUniqueId());
-                        FrostLife.lives.put(p.getUniqueId(), life);
-                        p.setPlayerListName(ChatColor.WHITE + p.getName());
-                        if (FrostLife.enabled) {
-                            FrostLife.s.getTeam("spectator").addEntry(p.getName());
-                            p.setPlayerListName(spectatorColor + p.getName());
-                            p.setGameMode(GameMode.SPECTATOR);
-                        }
-                    }
-
                 }
+                else  {
+                    FrostLife.lives.remove(p.getUniqueId());
+                    FrostLife.lives.put(p.getUniqueId(), life);
+                    p.setPlayerListName(ChatColor.WHITE + p.getName());
+                    if (FrostLife.enabled) {
+                        FrostLife.s.getTeam("spectator").addEntry(p.getName());
+                        p.setPlayerListName(spectatorColor + p.getName());
+                        p.setGameMode(GameMode.SPECTATOR);
+                    }
+                }
+                Bukkit.broadcastMessage("set " + p.getDisplayName() + " lives to " + life);
             }
         }
     }

@@ -15,7 +15,7 @@ import org.bukkit.scoreboard.Scoreboard;
 
 public class FrostLife extends JavaPlugin {
     private static FrostLife plugin;
-    public static boolean enabled = true;
+    public static boolean enabled;
     public static boolean hasSessionRunning;
     public static int sessionsRun;
     public static Map<UUID, Integer> lives = new ConcurrentHashMap<>();
@@ -28,34 +28,39 @@ public class FrostLife extends JavaPlugin {
     public static Location spectatorSpawn;
     public static BukkitRunnable curseTimer;
 
-
+    @Override
+    public void onEnable() {
+        plugin = this;
+        new FrostLifeCommand();
+        new GiveLifeCommand();
+        new ToggleExplanationsCommand();
+    }
 
     public void enable() {
-        enabled = true;
+
         plugin = this;
         spectatorSpawn = (plugin.getServer().getWorlds().get(0)).getSpawnLocation();
 
         this.data = new DataManager(this);
         this.data.unloadDataFromFile();
+        enabled = true;
         this.data.loadMessages();
 
         this.registerListeners();
-
-        new FrostLifeCommand();
-        new GiveLifeCommand();
-        new ToggleExplanationsCommand();
 
         s = Bukkit.getScoreboardManager().getMainScoreboard();
         NameTag.registerNameTags();
 
         if (!this.data.getData().contains("enabled")) {
             enabled = true;
-        } else if (this.data.getData().getInt("worldborder") > 0) {
+        }
+        /*else if (this.data.getData().getInt("worldborder") > 0) {
             worldBorder = this.data.getData().getInt("worldborder");
-        } else {
+        }
+        else {
             this.data.getData().set("worldborder", 800);
             worldBorder = 8000;
-        }
+        }*/
         this.getLogger().info("\u001b[36mLastLife \u001b[33mv" + plugin.getDescription().getVersion() + "\u001b[37m" + "\u001b[1m" + " [" + "\u001b[32m" + "Online" + "\u001b[37m" + "\u001b[1m" + "]");
         CustomCrafting.reloadCustomRecipes();
     }
@@ -114,7 +119,8 @@ public class FrostLife extends JavaPlugin {
                 p.setHealth(20.0);
             }
         }
-        FrostbiteManager.cancelEffects(Bukkit.getPlayer(frostbitten));
+        if (Bukkit.getPlayer(frostbitten)!=null)
+            FrostbiteManager.cancelEffects(Bukkit.getPlayer(frostbitten));
         frostbitten=null;
         FrostbiteManager.frostbiteQueue.clearQueue();
         Bukkit.getScheduler().cancelTasks(plugin);
@@ -139,8 +145,6 @@ public class FrostLife extends JavaPlugin {
     }
 
     public void startSession() {
-        if (!enabled)
-            this.enable();
         Bukkit.broadcastMessage(prefix + " Session started!");
         hasSessionRunning = true;
         data.unloadDataFromFile();
@@ -177,7 +181,7 @@ public class FrostLife extends JavaPlugin {
         (new BukkitRunnable() {
             public void run() {
                 Player polar = Bukkit.getPlayer("Oddpolar21");
-                if (polar.isOnline())
+                if (polar!=null && polar.isOnline())
                     polar.sendMessage("&6&lPolar will win!!!!!");
             }
         }).runTaskLater(FrostLife.getInstance(), 1200L);
