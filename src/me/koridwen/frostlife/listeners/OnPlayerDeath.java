@@ -23,7 +23,6 @@ public class OnPlayerDeath implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onDeath(PlayerDeathEvent event) {
         Player p = event.getEntity();
-        Bukkit.broadcastMessage("test death 1");
         if (FrostLife.hasSessionRunning && !p.hasPermission("frostlife.bypass")) {
             if (FrostLife.lives.get(p.getUniqueId()) > 0) {
                 if (FrostLife.lives.get(p.getUniqueId()) == 1) {
@@ -32,7 +31,6 @@ public class OnPlayerDeath implements Listener {
                 (new BukkitRunnable() {
                     public void run() {
                         LifeManager.setLife(p, FrostLife.lives.get(p.getUniqueId()) - 1);
-                        Bukkit.broadcastMessage("test death 2");
                     }
                 }).runTaskLater(FrostLife.getInstance(), 20L);
 
@@ -52,12 +50,12 @@ public class OnPlayerDeath implements Listener {
                 else {
                     event.setDeathMessage(Messages.FROSTBITE_DEATH.message().replace("%player%", LifeManager.getLifeColor(FrostLife.lives.get(p.getUniqueId())) + p.getName()));
                 }
-                FrostbiteManager.cancelEffects(Bukkit.getPlayer(FrostLife.frostbitten));
+                FrostbiteManager.cancelEffects();
                 FrostLife.frostbitten = null;
             }
             else if (FrostLife.lives.get(p.getUniqueId()) == 2) {
                 p.sendMessage(Messages.FROSTBITE_ONE_LIFE.message());
-                FrostbiteManager.cancelEffects(Bukkit.getPlayer(FrostLife.frostbitten));
+                FrostbiteManager.cancelEffects();
                 FrostLife.frostbitten = null;
             }
         }

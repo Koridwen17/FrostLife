@@ -18,21 +18,20 @@ public class ToggleExplanationsCommand implements CommandExecutor {
         if (!label.equalsIgnoreCase("toggleexplanations")) {
             return true;
         }
-        else if (!(sender instanceof Player)) {
+        else if (!(sender instanceof Player p)) {
             sender.sendMessage(ChatColor.RED + "This is a player only command");
             return true;
         }
         else {
-            Player p = (Player) sender;
             if (!FrostLife.explanations.containsKey(p.getUniqueId())) {
                 FrostLife.explanations.put(p.getUniqueId(), true);
                 p.sendMessage(ChatColor.GOLD + "toggled explanations on");
             }
-            else if (FrostLife.explanations.get(p.getUniqueId()) == true) {
+            else if (FrostLife.explanations.get(p.getUniqueId())) {
                 FrostLife.explanations.replace(p.getUniqueId(), false);
                 p.sendMessage(ChatColor.GOLD + "toggled explanations off");
             }
-            else if (FrostLife.explanations.get(p.getUniqueId()) == false) {
+            else if (!FrostLife.explanations.get(p.getUniqueId())) {
                 FrostLife.explanations.replace(p.getUniqueId(), true);
                 p.sendMessage(ChatColor.GREEN + "toggled explanations on");
             }

@@ -20,9 +20,9 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 public class FrostLifeCommand implements CommandExecutor, TabCompleter {
-    private List<String> arguments = new ArrayList<>();
-    private List<String> secondArguments = new ArrayList<>();
-    private List<String> thirdArguments = new ArrayList<>();
+    private final List<String> arguments = new ArrayList<>();
+    private final List<String> secondArguments = new ArrayList<>();
+    private final List<String> thirdArguments = new ArrayList<>();
 
     public FrostLifeCommand() {
         FrostLife.getInstance().getCommand("frostlife").setExecutor(this);
@@ -33,24 +33,18 @@ public class FrostLifeCommand implements CommandExecutor, TabCompleter {
         if (label.equalsIgnoreCase("FrostLife") || label.equalsIgnoreCase("lf")) {
             Player target;
 
-            if (sender instanceof Player) {
-                target = (Player)sender;
-                World w = target.getWorld();
-                if (!target.hasPermission("frostlife.manager") || !target.isPermissionSet("frostlife.manager")) {
-                    target.sendMessage(Messages.NO_COMMAND_PERMISSION.message());
-                    return true;
-                }
-
-                if (args.length == 1) {
-                    if (args[0].equalsIgnoreCase("enable")) {
-                        if (!FrostLife.enabled) {
-                            FrostLife.getInstance().enable();
-                            //w.getWorldBorder().setCenter(w.getSpawnLocation());
-                            //w.getWorldBorder().setSize((double)FrostLife.worldBorder);
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', FrostLife.prefix + " enabled successfully"));
-                        }
-                        else
-                            sender.sendMessage("already enabled");
+            if (args.length == 0) {
+                return false;
+            }
+            if (args.length == 1) {
+                if (args[0].equalsIgnoreCase("enable")) {
+                    if (!FrostLife.enabled) {
+                        FrostLife.getInstance().enable();
+                        //w.getWorldBorder().setCenter(w.getSpawnLocation());
+                        //w.getWorldBorder().setSize((double)FrostLife.worldBorder);
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', FrostLife.prefix + " enabled successfully"));
+                    } else
+                        sender.sendMessage("already enabled");
                        /* else {
                             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', FrostLife.prefix + " disabled successfully"));
                             //w.getWorldBorder().setSize(6.0E7);
@@ -82,200 +76,157 @@ public class FrostLifeCommand implements CommandExecutor, TabCompleter {
                             FrostLife.enabled = false;
                         }*/
 
-                        return true;
-                    }
-
-                    if (args[0].equalsIgnoreCase("startSession")) {
-                        if (!FrostLife.enabled) {
-                            FrostLife.getInstance().enable();
-                            FrostLife.getInstance().data.loadDataToFile();
-                        }
-                        if (FrostLife.hasSessionRunning)
-                            sender.sendMessage(ChatColor.RED + "A session is already running");
-                        else {
-                            FrostLife.getInstance().startSession();
-                        }
-                        return true;
-                    }
-
-                    if (args[0].equalsIgnoreCase("endSession")) {
-                        if (!FrostLife.hasSessionRunning)
-                            sender.sendMessage(ChatColor.RED + "No session is currently running");
-                        else FrostLife.getInstance().endSession();
-                        return true;
-                    }
-
-                    if (args[0].equalsIgnoreCase("setSpawn")) {
-                        w.setSpawnLocation(target.getLocation());
-                        w.getWorldBorder().setCenter(target.getLocation());
-                        target.sendMessage(ChatColor.translateAlternateColorCodes('&', FrostLife.prefix + " Set world spawn successfully"));
-                    }
-
-                    if (args[0].equalsIgnoreCase("help")) {
-                        return true;
-                    }
-                }
-
-                else if (args.length == 2) {
-                    if (args[0].equalsIgnoreCase("curse")) {
-                        if (args[1].equalsIgnoreCase("roll")) {
-                            if (FrostLife.hasSessionRunning) {
-                                FrostLife.curseTimer.cancel();
-                                FrostbiteManager.frostbiteQueue.clearQueue();
-                                FrostbiteManager.startFrostbiteCycle();
-                            }
-                        }
-                        if (args[1].equalsIgnoreCase("strike")) {
-                            if (FrostLife.hasSessionRunning) {
-                                FrostbiteManager.strikeCurse();
-                            }
-                        }
-                        if (args[1].equalsIgnoreCase("getFrostbitten")) {
-                            if (FrostLife.frostbitten !=null)
-                                target.sendMessage(Bukkit.getPlayer(FrostLife.frostbitten).getName());
-                            else target.sendMessage("no one is cursed yet");
-                        }
-                        return true;
-                    }
-
-
-
-                    if (args[0].equalsIgnoreCase("setCurse") && args.length == 2) {
-                        Player p = Bukkit.getPlayer(args[1]);
-                        if (FrostLife.frostbitten != null) {
-                            FrostbiteManager.cancelEffects(Bukkit.getPlayer(FrostLife.frostbitten));
-                            FrostLife.frostbitten = null;
-                        }
-                        FrostbiteManager.curseStage = 0;
-                        FrostLife.frostbitten = p.getUniqueId();
-                        FrostbiteManager.startCurse();
-                    }
-
-                    if (args[0].equalsIgnoreCase("setBorder") && args.length == 2) {
-                        int size;
-                        if (StringManipulator.isNumeric(args[1]) && FrostLife.enabled) {
-                            size = Integer.parseInt(args[1]);
-                            w.getWorldBorder().setCenter(w.getSpawnLocation());
-                            w.getWorldBorder().setSize((double) size);
-                            FrostLife.worldBorder = size;
-                            target.sendMessage(ChatColor.translateAlternateColorCodes('&', FrostLife.prefix + " Set world boarder size to &f[&6" + size + "&f]"));
-                            return true;
-                        }
-
-                        if (!StringManipulator.isNumeric(args[1])) {
-                            target.sendMessage(ChatColor.RED + "Invalid border size");
-                            return true;
-                        }
-
-                        if (!FrostLife.enabled) {
-                            size = Integer.parseInt(args[1]);
-                            FrostLife.worldBorder = size;
-                            target.sendMessage(ChatColor.translateAlternateColorCodes('&', FrostLife.prefix + " Updated border to &f[&6" + size + "&f]"));
-                            target.sendMessage(ChatColor.YELLOW + "(Enable the plugin to see the border)");
-                        }
-                    }
-                }
-            }
-            else {
-                if (args.length == 0) {
-                    sender.sendMessage(ChatColor.RED + "This is a player only command");
-                    return false;
-                }
-                if (!args[0].equalsIgnoreCase("addlife") && !args[0].equalsIgnoreCase("removelife") && !args[0].equalsIgnoreCase("reset")) {
-                    sender.sendMessage(ChatColor.RED + "This is a player only command");
                     return true;
                 }
-                if (!sender.hasPermission("frostlife.manager")) {
-                    sender.sendMessage(Messages.NO_COMMAND_PERMISSION.message());
+
+                if (args[0].equalsIgnoreCase("startsession")) {
+                    if (!FrostLife.enabled) {
+                        FrostLife.getInstance().enable();
+                        FrostLife.getInstance().data.loadDataToFile();
+                    }
+                    if (FrostLife.hasSessionRunning)
+                        sender.sendMessage(ChatColor.RED + "A session is already running");
+                    else {
+                        FrostLife.getInstance().startSession();
+                    }
                     return true;
                 }
-            }
 
-            if (args.length == 1) {
+                if (args[0].equalsIgnoreCase("endsession")) {
+                    if (!FrostLife.hasSessionRunning)
+                        sender.sendMessage(ChatColor.RED + "No session is currently running");
+                    else FrostLife.getInstance().endSession();
+                    return true;
+                }
+
                 if (args[0].equalsIgnoreCase("reset")) {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', FrostLife.prefix + " Reset Complete"));
                     FrostLife.getInstance().reset();
                     return true;
                 }
-            }
 
-            else if (args.length >= 2) {
+                if (args[0].equalsIgnoreCase("help")) {
+                    return true;
+                }
+                if (args[0].equalsIgnoreCase("w")) {
+                    sender.sendMessage(FrostbiteManager.waitingToStrike + "");
+                }
+            }
+            if (args.length >= 2) {
+                if (args[0].equalsIgnoreCase("curse")) {
+                    if (args[1].equalsIgnoreCase("roll")) {
+                        if (FrostLife.hasSessionRunning) {
+                            FrostLife.curseTimer.cancel();
+                            FrostbiteManager.frostbiteQueue.clearQueue();
+                            FrostbiteManager.startFrostbiteCycle();
+                        }
+                        return true;
+                    }
+
+                    if (args[1].equalsIgnoreCase("strike")) {
+                        if (FrostLife.hasSessionRunning) {
+                            FrostbiteManager.strikeCurse();
+                        }
+                        return true;
+                    }
+
+                    if (args[1].equalsIgnoreCase("getfrostbitten")) {
+                        if (FrostLife.frostbitten != null)
+                            sender.sendMessage(Bukkit.getPlayer(FrostLife.frostbitten).getName());
+                        else
+                            sender.sendMessage("no one is cursed yet");
+                        return true;
+                    }
+                    return false;
+                }
                 if (args[0].equalsIgnoreCase("debug")) {
                     if (args[1].equalsIgnoreCase("savedata")) {
                         FrostLife.getInstance().data.loadDataToFile();
                         sender.sendMessage(ChatColor.GREEN + "data saved");
                         return true;
                     }
+
                     if (args[1].equalsIgnoreCase("registerteams")) {
                         NameTag.registerNameTags();
                         for (UUID uuid : FrostLife.lives.keySet()) {
-                            LifeManager.setLife(Bukkit.getPlayer(uuid),FrostLife.lives.get(uuid));
+                            LifeManager.setLife(Bukkit.getPlayer(uuid), FrostLife.lives.get(uuid));
                         }
                         sender.sendMessage(ChatColor.GREEN + "teams registered");
                         return true;
                     }
-                    if (args[1].equalsIgnoreCase("getLives") && args.length == 3) {
-                        Player p = Bukkit.getPlayer(args[2]);
-                        sender.sendMessage(FrostLife.lives.get(p.getUniqueId()).toString());
-                        return true;
-                    }
 
-                    OfflinePlayer op;
-                    if (args[1].equalsIgnoreCase("addlife")) {
-                        target = Bukkit.getPlayer(args[1]);
-                        if (target == null) {
+                    if (args.length==3) {
+                        if (args[1].equalsIgnoreCase("getlives")) {
+                            Player p = Bukkit.getPlayer(args[2]);
+                            if (p!=null)
+                                sender.sendMessage(FrostLife.lives.get(p.getUniqueId()).toString());
+                            else
+                                sender.sendMessage(ChatColor.RED + "Invalid player name");
+                            return true;
+                        }
+
+                        if (args[1].equalsIgnoreCase("addlife")) {
+                            target = Bukkit.getPlayer(args[2]);
+                        /*if (target == null) {
                             op = Bukkit.getOfflinePlayer(args[1]);
                             if (op.hasPlayedBefore() && FrostLife.lives.containsKey(op.getUniqueId())) {
                                 this.addLifeToOfflinePlayer(sender, op);
-                            } else {
+                            }
+                            else {
                                 sender.sendMessage(ChatColor.RED + "Invalid player name");
                             }
-
+                            return true;
+                        }*/
+                            if (target != null)
+                                this.addLifeToOnlinePlayer(sender, target);
+                            else
+                                sender.sendMessage(ChatColor.RED + "Invalid player name");
                             return true;
                         }
 
-                        this.addLifeToOnlinePlayer(sender, target);
-                    }
-                    if (args[1].equalsIgnoreCase("removelife")) {
-                        target = Bukkit.getPlayer(args[1]);
-                        if (target == null) {
-                            op = Bukkit.getOfflinePlayer(args[1]);
-                            if (op.hasPlayedBefore() && FrostLife.lives.containsKey(op.getUniqueId())) {
-                                this.removeLifeFromOfflinePlayer(sender, op);
-                            } else {
-                                sender.sendMessage(ChatColor.RED + "Invalid player name");
-                            }
+                        if (args[1].equalsIgnoreCase("removelife")) {
+                            target = Bukkit.getPlayer(args[2]);
+                            /*if (target == null) {
+                                op = Bukkit.getOfflinePlayer(args[1]);
+                                if (op.hasPlayedBefore() && FrostLife.lives.containsKey(op.getUniqueId())) {
+                                    this.removeLifeFromOfflinePlayer(sender, op);
+                                } else {
+                                    sender.sendMessage(ChatColor.RED + "Invalid player name");
+                                }
 
+                                return true;
+                            }*/
+                            if (target != null)
+                                this.removeLifeFromOnlinePlayer(sender, target);
+                            else
+                                sender.sendMessage(ChatColor.RED + "Invalid player name");
                             return true;
                         }
 
-                        this.removeLifeFromOnlinePlayer(sender, target);
-                    }
-                    if (args[0].equalsIgnoreCase("randomizelife")) {
-                        if (args[1].equals("@a")) {
-                            Iterator var9 = Bukkit.getOnlinePlayers().iterator();
-
-                            while(var9.hasNext()) {
-                                Player p = (Player)var9.next();
-                                if (!p.hasPermission("frostlife.bypass")) {
-                                    LifeManager.setPlayerToRandomLife(p);
+                        if (args[1].equalsIgnoreCase("randomizelife")) {
+                            if (args[2].equals("@a")) {
+                                for (Player p : Bukkit.getOnlinePlayers()) {
+                                    if (!p.hasPermission("frostlife.bypass")) {
+                                        LifeManager.setPlayerToRandomLife(p);
+                                    }
+                                }
+                                sender.sendMessage(ChatColor.GREEN + "Randomizing all online players life count...");
+                            }
+                            else {
+                                target = Bukkit.getPlayer(args[2]);
+                                if (target != null) {
+                                    if (!target.hasPermission("frostlife.bypass")) {
+                                        LifeManager.setPlayerToRandomLife(target);
+                                        sender.sendMessage(ChatColor.GREEN + "Randomizing " + ChatColor.GOLD + target.getName() + "'s" + ChatColor.GREEN + " life count...");
+                                    }
+                                    else
+                                        sender.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.RED + " has bypassed the command");
                                 }
                             }
-
-                            sender.sendMessage(ChatColor.GREEN + "Randomizing all online players life count...");
                             return true;
                         }
-
-                        target = Bukkit.getPlayer(args[1]);
-                        if (target != null) {
-                            if (!target.hasPermission("frostlife.bypass")) {
-                                LifeManager.setPlayerToRandomLife(target);
-                                sender.sendMessage(ChatColor.GREEN + "Randomizing " + ChatColor.GOLD + target.getName() + "'s" + ChatColor.GREEN + " life count...");
-                            } else {
-                                sender.sendMessage(ChatColor.GOLD + target.getName() + ChatColor.RED + " has bypassed the command");
-                            }
-                        }
                     }
+                    return false;
                 }
             }
         }
@@ -285,25 +236,13 @@ public class FrostLifeCommand implements CommandExecutor, TabCompleter {
     public void addLifeToOnlinePlayer(CommandSender sender, Player target) {
         if (!target.hasPermission("frostlife.bypass")) {
             if (!FrostLife.lives.containsKey(target.getUniqueId())) {
-                if (LifeManager.maxLives > 0) {
-                    LifeManager.setLife(target, LifeManager.maxLives + 3);
-                } else {
-                    LifeManager.setLife(target, 3);
-                }
-            }
-
-            if (LifeManager.maxLives == 0 && (Integer)FrostLife.lives.get(target.getUniqueId()) == 3 || LifeManager.maxLives > 0 && (Integer)FrostLife.lives.get(target.getUniqueId()) == LifeManager.maxLives + 3) {
-                sender.sendMessage(ChatColor.RED + "This player already has max lives");
+                sender.sendMessage(ChatColor.RED + "Player not yet registered");
                 return;
             }
-
-            if (LifeManager.maxLives > 0 && (Integer)FrostLife.lives.get(target.getUniqueId()) >= 3 && (Integer)FrostLife.lives.get(target.getUniqueId()) != LifeManager.maxLives + 3) {
-                LifeManager.setLife(target, (Integer)FrostLife.lives.get(target.getUniqueId()));
+            if (FrostLife.lives.get(target.getUniqueId()) != 0) {
+                LifeManager.setLife(target, FrostLife.lives.get(target.getUniqueId()) + 1);
             }
-
-            if ((Integer)FrostLife.lives.get(target.getUniqueId()) != 0) {
-                LifeManager.setLife(target, (Integer)FrostLife.lives.get(target.getUniqueId()) + 1);
-            } else if ((Integer)FrostLife.lives.get(target.getUniqueId()) == 0) {
+            else if (FrostLife.lives.get(target.getUniqueId()) == 0) {
                 LifeManager.setLife(target, 1);
                 if (target.getGameMode() == GameMode.SPECTATOR) {
                     Location loc = target.getWorld().getHighestBlockAt((int)target.getLocation().getX(), (int)target.getLocation().getZ()).getLocation();
@@ -312,7 +251,6 @@ public class FrostLifeCommand implements CommandExecutor, TabCompleter {
                     loc.setYaw(target.getLocation().getYaw());
                     target.teleport(loc);
                 }
-
                 target.setGameMode(GameMode.SURVIVAL);
                 target.setHealth(20.0);
                 if (FrostLife.enabled) {
@@ -324,13 +262,12 @@ public class FrostLifeCommand implements CommandExecutor, TabCompleter {
             if (sender != target) {
                 target.sendMessage(ChatColor.GREEN + "You have been given a life");
             }
-        } else {
-            sender.sendMessage(ChatColor.RED + "Targeted player has the bypass permission");
         }
-
+        else
+            sender.sendMessage(ChatColor.RED + "Targeted player has the bypass permission");
     }
 
-    public void addLifeToOfflinePlayer(CommandSender sender, OfflinePlayer target) {
+    /*public void addLifeToOfflinePlayer(CommandSender sender, OfflinePlayer target) {
         if (!FrostLife.lives.containsKey(target.getUniqueId())) {
             if (LifeManager.maxLives > 0) {
                 LifeManager.setLifeOfOfflinePlayer(target, LifeManager.maxLives + 3);
@@ -354,31 +291,30 @@ public class FrostLifeCommand implements CommandExecutor, TabCompleter {
         } else {
             sender.sendMessage(ChatColor.RED + "This player already has max lives");
         }
-    }
+    }*/
 
     public void removeLifeFromOnlinePlayer(CommandSender sender, Player target) {
         if (!target.hasPermission("frostlife.bypass")) {
             if (!FrostLife.lives.containsKey(target.getUniqueId())) {
-                if (LifeManager.maxLives > 0) {
-                    LifeManager.setLife(target, LifeManager.maxLives - 1);
-                } else {
-                    LifeManager.setLife(target, 2);
-                }
+                sender.sendMessage(ChatColor.RED + "Player not yet registered");
+                return;
             }
 
-            if ((Integer)FrostLife.lives.get(target.getUniqueId()) == 0) {
+            if (FrostLife.lives.get(target.getUniqueId()) == 0) {
                 sender.sendMessage(ChatColor.RED + "This player doesn't have any lives to remove");
                 return;
             }
 
-            if ((Integer)FrostLife.lives.get(target.getUniqueId()) - 1 != 0 && (Integer)FrostLife.lives.get(target.getUniqueId()) - 1 != 1) {
-                LifeManager.setLife(target, (Integer)FrostLife.lives.get(target.getUniqueId()) - 1);
-            } else if ((Integer)FrostLife.lives.get(target.getUniqueId()) - 1 == 1) {
+            if (FrostLife.lives.get(target.getUniqueId()) - 1 != 0 && FrostLife.lives.get(target.getUniqueId()) - 1 != 1) {
+                LifeManager.setLife(target, FrostLife.lives.get(target.getUniqueId()) - 1);
+            }
+            else if (FrostLife.lives.get(target.getUniqueId()) - 1 == 1) {
                 LifeManager.setLife(target, 1);
                 if (FrostLife.enabled) {
                     target.sendTitle(Messages.LASTLIFE_WARNING_MAIN.message(), Messages.LASTLIFE_WARNING_SUB.message(), 10, 70, 10);
                 }
-            } else if ((Integer)FrostLife.lives.get(target.getUniqueId()) - 1 == 0) {
+            }
+            else if (FrostLife.lives.get(target.getUniqueId()) - 1 == 0) {
                 LifeManager.setLife(target, 0);
                 target.setGameMode(GameMode.SPECTATOR);
             }
@@ -387,13 +323,14 @@ public class FrostLifeCommand implements CommandExecutor, TabCompleter {
             if (sender != target) {
                 target.sendMessage(ChatColor.GREEN + "You have had one life removed");
             }
-        } else {
-            sender.sendMessage(ChatColor.RED + "Targeted player has the bypass permission");
         }
+        else
+            sender.sendMessage(ChatColor.RED + "Targeted player has the bypass permission");
+
 
     }
 
-    public void removeLifeFromOfflinePlayer(CommandSender sender, OfflinePlayer target) {
+    /*public void removeLifeFromOfflinePlayer(CommandSender sender, OfflinePlayer target) {
         if (!FrostLife.lives.containsKey(target.getUniqueId())) {
             if (LifeManager.maxLives > 0) {
                 LifeManager.setLifeOfOfflinePlayer(target, LifeManager.maxLives - 1);
@@ -415,7 +352,7 @@ public class FrostLifeCommand implements CommandExecutor, TabCompleter {
 
             sender.sendMessage(ChatColor.GREEN + "Removed life from " + ChatColor.GOLD + target.getName());
         }
-    }
+    }*/
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
@@ -425,8 +362,6 @@ public class FrostLifeCommand implements CommandExecutor, TabCompleter {
             this.arguments.add("endsession");
             this.arguments.add("curse");
             this.arguments.add("debug");
-            this.arguments.add("addLife");
-            this.arguments.add("removeLife");
             return this.arguments;
         }
 
@@ -434,7 +369,7 @@ public class FrostLifeCommand implements CommandExecutor, TabCompleter {
             this.secondArguments.clear();
             this.secondArguments.add("roll");
             this.secondArguments.add("strike");
-            this.secondArguments.add("getFrostbitten");
+            this.secondArguments.add("getfrostbitten");
             return this.secondArguments;
         }
 

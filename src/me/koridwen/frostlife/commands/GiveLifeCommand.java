@@ -18,7 +18,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class GiveLifeCommand implements CommandExecutor {
-    public Map<UUID, Long> cooldowns = new HashMap();
+    public Map<UUID, Long> cooldowns = new HashMap<>();
 
     public GiveLifeCommand() {
         FrostLife.getInstance().getCommand("givelife").setExecutor(this);
@@ -28,13 +28,12 @@ public class GiveLifeCommand implements CommandExecutor {
         if (!label.equalsIgnoreCase("givelife")) {
             return true;
         }
-        else if (!(sender instanceof Player)) {
+        else if (!(sender instanceof Player p)) {
             sender.sendMessage(ChatColor.RED + "This is a player only command");
             return true;
         }
         else {
-            Player p = (Player)sender;
-            if (!p.hasPermission("frostlife.givelife") && !p.hasPermission("frostlife.manager")) {
+            if ((!p.hasPermission("frostlife.givelife") && !p.hasPermission("frostlife.manager")) || p.hasPermission("frostlife.bypass")) {
                 p.sendMessage(Messages.NO_COMMAND_PERMISSION.message());
                 return true;
             }
@@ -72,10 +71,10 @@ public class GiveLifeCommand implements CommandExecutor {
                     p.sendMessage(Messages.GIVE_LIFE_NO_LIVES.message());
                     return true;
                 }
-                else if (FrostLife.lives.get(target.getUniqueId()) == LifeManager.maxLives) {
+                /*else if (FrostLife.lives.get(target.getUniqueId()) == LifeManager.maxLives) {
                     p.sendMessage(Messages.GIVE_LIFE_MAX.message().replace("%player%", ChatColor.GOLD + target.getName()));
                     return true;
-                }
+                }*/
                 else {
                     this.cooldowns.put(p.getUniqueId(), System.currentTimeMillis() + 2000L);
                     this.giveLife(p, target);

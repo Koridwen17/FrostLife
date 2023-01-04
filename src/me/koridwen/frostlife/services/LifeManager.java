@@ -11,7 +11,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class LifeManager {
-    public static int maxLives = 4;
     public static ChatColor extraLivesColor = ChatColor.DARK_PURPLE;
     public static ChatColor firstLifeColor = ChatColor.LIGHT_PURPLE;
     public static ChatColor secondLifeColor = ChatColor.AQUA;
@@ -94,12 +93,11 @@ public class LifeManager {
                         p.setGameMode(GameMode.SPECTATOR);
                     }
                 }
-                Bukkit.broadcastMessage("set " + p.getDisplayName() + " lives to " + life);
             }
         }
     }
 
-    public static void setLifeOfOfflinePlayer(OfflinePlayer p, Integer life) {
+    /*public static void setLifeOfOfflinePlayer(OfflinePlayer p, Integer life) {
         if (!FrostLife.explanations.containsKey(p.getUniqueId()))
             FrostLife.explanations.put(p.getUniqueId(), true);
         if (p != null) {
@@ -154,10 +152,10 @@ public class LifeManager {
                 }
             }
         }
-    }
+    }*/
 
     public static void setPlayerToRandomLife(final Player p) {
-        final ArrayList<String> stringNumbers = new ArrayList();
+        final ArrayList<String> stringNumbers = new ArrayList<>();
         int min = randomLifeCountMinimum;
 
         for(int i = min; i <= randomLifeCountMaximum; ++i) {
@@ -197,8 +195,8 @@ public class LifeManager {
                             this.delay += 0.0048;
                             if ((double)this.ticks > this.delay * 10.0) {
                                 this.ticks = 0;
-                                int num = LifeManager.noRepeatRandomNumber(0, stringNumbers.size(), this.lastNum);
-                                this.life = (String)stringNumbers.get(num);
+                                int num = LifeManager.noRepeatRandomNumber(stringNumbers.size(), this.lastNum);
+                                this.life = stringNumbers.get(num);
                                 this.lastNum = num;
                                 p.playSound(p.getLocation(), Sound.BLOCK_DISPENSER_DISPENSE, 1.0F, 1.0F);
                                 p.sendTitle(this.life, "", 0, 30, 0);
@@ -215,10 +213,10 @@ public class LifeManager {
         }).runTaskLater(FrostLife.getInstance(), 25L);
     }
 
-    private static int noRepeatRandomNumber(int min, int max, int badNum) {
+    private static int noRepeatRandomNumber(int max, int badNum) {
         int num;
         do {
-            num = (int)(Math.random() * (double)(max - min) + (double)min);
+            num = (int)(Math.random() * (double)max);
         } while(num == badNum);
 
         return num;

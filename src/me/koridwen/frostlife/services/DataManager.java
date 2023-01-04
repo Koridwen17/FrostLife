@@ -122,14 +122,13 @@ public class DataManager {
             this.getData().getConfigurationSection("lives").getKeys(false).forEach((key) -> {
                 int value = Integer.parseInt(this.getData().getString("lives." + key));
                 UUID keyuuid = UUID.fromString(key);
-                if (!FrostLife.lives.containsKey(keyuuid)) {
-                    if (value <= LifeManager.maxLives + 3) {
+                FrostLife.lives.put(keyuuid, value);
+                    /*if (value <= LifeManager.maxLives + 3) {
                         FrostLife.lives.put(keyuuid, value);
-                    } else if (value > LifeManager.maxLives + 3) {
-                        FrostLife.lives.put(keyuuid, LifeManager.maxLives + 3);
                     }
-                }
-
+                    else if (value > LifeManager.maxLives + 3) {
+                        FrostLife.lives.put(keyuuid, LifeManager.maxLives + 3);
+                    }*/
             });
         }
         if (this.getData().get("explanations.") != null) {

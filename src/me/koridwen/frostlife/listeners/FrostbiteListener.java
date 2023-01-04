@@ -4,7 +4,6 @@ import me.koridwen.frostlife.FrostLife;
 import me.koridwen.frostlife.services.FrostbiteManager;
 import me.koridwen.frostlife.services.LifeManager;
 import me.koridwen.frostlife.services.Messages;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -28,6 +27,7 @@ public class FrostbiteListener implements Listener {
         if (proj instanceof Snowball && event.getHitEntity() != null && proj.getShooter() instanceof Player launcher && event.getHitEntity() instanceof Player receiver) {
 
             if (launcher.getUniqueId() == FrostLife.frostbitten && launcher.getUniqueId()!=receiver.getUniqueId()) {
+                //blue life case
                 if (FrostLife.lives.get(receiver.getUniqueId()) <= 1) {
                     FrostbiteManager.infection(launcher,receiver);
                     launcher.sendMessage(Messages.INFECTION_ONE_LIFE.message().replace("%player%", LifeManager.getLifeColor(FrostLife.lives.get(receiver.getUniqueId())) + receiver.getName()));
@@ -37,12 +37,10 @@ public class FrostbiteListener implements Listener {
                     launcher.sendMessage(Messages.INFECTION_ALREADY_INFECTED.message().replace("%player%", LifeManager.getLifeColor(FrostLife.lives.get(receiver.getUniqueId())) + receiver.getName()));
                     (new PotionEffect(PotionEffectType.GLOWING, 40, 0, false, false, true)).apply(launcher);
                 }
-                else {
+                else if (!FrostbiteManager.waitingToStrike) {
                     FrostbiteManager.infection(launcher,receiver);
                     launcher.sendMessage(Messages.FROSTBITE_INFECTION.message());
                 }
-
-
             }
         }
     }
@@ -64,15 +62,3 @@ public class FrostbiteListener implements Listener {
         }
     }
 }
-
-/*
-nothing
-+weakness I
-+weakness II
-+hunger I
-+nausea
-+mining fatigue I
-+emitting particles
-+freezing
-+taking damage
- */

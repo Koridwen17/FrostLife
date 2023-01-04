@@ -77,7 +77,7 @@ public class FrostLife extends JavaPlugin {
         pm.registerEvents(new OnPlayerLeave(), this);
     }
 
-    public void reload() {
+    /*public void reload() {
         this.reloadConfig();
         DataManager.getInstance().loadMessages();
         NameTag.registerNameTags();
@@ -97,7 +97,7 @@ public class FrostLife extends JavaPlugin {
         }
         this.data.loadDataToFile();
         worldBorder = this.data.getData().getInt("worldborder");
-    }
+    }*/
 
     public void reset() {
         for (String playerName : s.getTeam("firstlife").getEntries()) {
@@ -119,8 +119,8 @@ public class FrostLife extends JavaPlugin {
                 p.setHealth(20.0);
             }
         }
-        if (Bukkit.getPlayer(frostbitten)!=null)
-            FrostbiteManager.cancelEffects(Bukkit.getPlayer(frostbitten));
+        if (frostbitten!=null && Bukkit.getPlayer(frostbitten).isOnline())
+            FrostbiteManager.removeEffects(Bukkit.getPlayer(frostbitten));
         frostbitten=null;
         FrostbiteManager.frostbiteQueue.clearQueue();
         Bukkit.getScheduler().cancelTasks(plugin);
@@ -148,16 +148,16 @@ public class FrostLife extends JavaPlugin {
         Bukkit.broadcastMessage(prefix + " Session started!");
         hasSessionRunning = true;
         data.unloadDataFromFile();
+        frostbitten=null;
         sessionsRun++;
         //attributing lives & explanations
         for (Player p : Bukkit.getOnlinePlayers()) {
-            if (explanations.containsKey(p.getUniqueId()))
-                explanations.replace(p.getUniqueId(), true);
-            else
+            if (!explanations.containsKey(p.getUniqueId()))
                 explanations.put(p.getUniqueId(), true);
             if (!lives.containsKey(p.getUniqueId())) {
                 if (!p.hasPermission("frostlife.bypass")) {
                     LifeManager.setPlayerToRandomLife(p);
+                    explanations.put(p.getUniqueId(), true);
                 }
             }
         }

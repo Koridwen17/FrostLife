@@ -46,6 +46,7 @@ public class CustomCrafting {
     }
 
     private static void registerRecipes() {
+        Bukkit.getServer().addRecipe(getSnowRecipe());
         if (isNametagTweaked) {
             Bukkit.getServer().addRecipe(getNameTagRecipe());
         }
@@ -101,9 +102,18 @@ public class CustomCrafting {
         NamespacedKey key = new NamespacedKey(FrostLife.getInstance(), "spore");
         ItemStack item = new ItemStack(Material.SPORE_BLOSSOM);
         ShapedRecipe recipe = new ShapedRecipe(key, item);
-        recipe.shape(new String[]{"  M", " L ", "   "});
+        recipe.shape("  M", " L ", "   ");
         recipe.setIngredient('M', Material.MOSS_BLOCK);
         recipe.setIngredient('L', Material.LILAC);
+        return recipe;
+    }
+
+    private static ShapedRecipe getSnowRecipe() {
+        NamespacedKey key = new NamespacedKey(FrostLife.getInstance(), "snow");
+        ItemStack item = new ItemStack(Material.SNOW,8);
+        ShapedRecipe recipe = new ShapedRecipe(key, item);
+        recipe.shape("   ", "   ", "SS ");
+        recipe.setIngredient('S', Material.SNOW_BLOCK);
         return recipe;
     }
 

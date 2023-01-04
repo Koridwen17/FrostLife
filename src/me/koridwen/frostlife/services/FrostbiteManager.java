@@ -24,15 +24,23 @@ public class FrostbiteManager {
     public static FrostbiteQueue frostbiteQueue = new FrostbiteQueue();
     public static int curseStage = 0;
     public static Random random = new Random();
+    public static boolean waitingToStrike;
 
 
     public static void startFrostbiteCycle() {
         //complete reset of curse
         curseStage = 0;
-        if (FrostLife.frostbitten != null) {
-            cancelEffects(Bukkit.getPlayer(FrostLife.frostbitten));
-            FrostLife.frostbitten=null;
+        if (FrostLife.frostbitten!=null) {
+            if (Bukkit.getPlayer(FrostLife.frostbitten).isOnline()) {
+                FrostbiteManager.removeEffects(Bukkit.getPlayer(FrostLife.frostbitten));
+                cancelEffects();
+            }
+            else {
+
+            }
         }
+        FrostLife.frostbitten=null;
+        waitingToStrike=false;
 
         //putting the curse on someone random
         if (infectRandom())
@@ -186,7 +194,8 @@ public class FrostbiteManager {
 
     public static void infection (Player infecter, Player infected) {
         FrostLife.frostbitten = infected.getUniqueId();
-        cancelEffects(infecter);
+        cancelEffects();
+        removeEffects(infecter);
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.playSound(infected.getLocation(), Sound.ENTITY_WARDEN_SONIC_BOOM, 1.0f, 1.0f);
         }
@@ -195,12 +204,7 @@ public class FrostbiteManager {
         startCurse();
     }
 
-    public static void cancelEffects(Player cursed) {
-        cursed.removePotionEffect(PotionEffectType.WEAKNESS);
-        cursed.removePotionEffect(PotionEffectType.HUNGER);
-        cursed.removePotionEffect(PotionEffectType.CONFUSION);
-        cursed.removePotionEffect(PotionEffectType.SLOW);
-
+    public static void cancelEffects() {
         addWeakness.cancel();
         addHunger.cancel();
         addSlowness.cancel();
@@ -212,6 +216,12 @@ public class FrostbiteManager {
 
         curseStage=0;
         freezeTicks=0;
+    }
+    public static void removeEffects(Player cursed) {
+        cursed.removePotionEffect(PotionEffectType.WEAKNESS);
+        cursed.removePotionEffect(PotionEffectType.HUNGER);
+        cursed.removePotionEffect(PotionEffectType.CONFUSION);
+        cursed.removePotionEffect(PotionEffectType.SLOW);
         cursed.setFreezeTicks(0);
     }
 
@@ -229,7 +239,6 @@ public class FrostbiteManager {
 
     public static boolean infectRandom() {
         ArrayList<UUID> potential = new ArrayList<>();
-        potential.clear();
         for (UUID uuid : FrostLife.lives.keySet()) {
             if (FrostLife.lives.get(uuid) >= 2 && !frostbiteQueue.containsPlayer(uuid)) {
                 potential.add(uuid);
@@ -255,10 +264,10 @@ public class FrostbiteManager {
                 {1,2,0} , {0,2,1} , {0,2,0} , {0,2,-1} , {-1,2,0}
         };
         Location loci;
-        for (int i = 0; i< locations.length; i++) {
+        for (Integer[] location : locations) {
 
-            loci=baseLoc.clone();
-            Block block = loci.add((double)locations[i][0], (double)locations[i][1], (double)locations[i][2]).getBlock();
+            loci = baseLoc.clone();
+            Block block = loci.add((double) location[0], (double) location[1], (double) location[2]).getBlock();
             if (!block.getType().isSolid()) {
                 block.setType(Material.POWDER_SNOW);
             }
@@ -267,14 +276,28 @@ public class FrostbiteManager {
 
     public static void strikeCurse() {
         if (FrostLife.frostbitten != null) {
-            Player p = Bukkit.getPlayer(FrostLife.frostbitten);
-            p.sendMessage(Messages.FROSTBITE_LOSE_LIFE.message());
-            p.getWorld().strikeLightningEffect(p.getLocation());
-            LifeManager.setLife(p, (Integer) FrostLife.lives.get(FrostLife.frostbitten) - 1);
-            FrostbiteManager.cancelEffects(p);
-            FrostLife.frostbitten=null;
+            Player cursed = Bukkit.getPlayer(FrostLife.frostbitten);
+            if (cursed!=null && cursed.isOnline()) {
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    p.playSound(p.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 0.3f, 1.0f);
+                }
+                (new BukkitRunnable() {
+                    public void run() {
+                        cursed.sendMessage(Messages.FROSTBITE_LOSE_LIFE.message());
+                        cursed.getWorld().strikeLightningEffect(cursed.getLocation());
+                        LifeManager.setLife(cursed, FrostLife.lives.get(FrostLife.frostbitten) - 1);
+                        FrostbiteManager.cancelEffects();
+                        FrostLife.frostbitten=null;
+                        FrostbiteManager.frostbiteQueue.clearQueue();
+                        waitingToStrike=false;
+                    }
+                }).runTaskLater(FrostLife.getInstance(),60L);
+
+            }
+            else {
+                waitingToStrike=true;
+            }
         }
-        FrostbiteManager.frostbiteQueue.clearQueue();
     }
 
     private static long generateSessionLength() {
