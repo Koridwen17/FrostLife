@@ -18,6 +18,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class FrostLifeCommand implements CommandExecutor, TabCompleter {
     private final List<String> arguments = new ArrayList<>();
@@ -102,6 +103,40 @@ public class FrostLifeCommand implements CommandExecutor, TabCompleter {
                 if (args[0].equalsIgnoreCase("reset")) {
                     sender.sendMessage(ChatColor.translateAlternateColorCodes('&', FrostLife.prefix + " Reset Complete"));
                     FrostLife.getInstance().reset();
+                    return true;
+                }
+
+                if (args[0].equalsIgnoreCase("liferitual")) {
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', FrostLife.prefix + " Life ritual Complete"));
+                    for (Player p : Bukkit.getOnlinePlayers()) {
+                        p.playEffect(EntityEffect.TOTEM_RESURRECT);
+                        (new BukkitRunnable() {
+                            public void run() {
+                                (new BukkitRunnable() {
+                                    int runs = 0;
+
+                                    public void run() {
+                                        if (this.runs == 2) {
+                                            this.cancel();
+                                        } else {
+                                            Location loc = p.getLocation();
+                                            double radius = 0.6;
+
+                                            for(double y = 0.0; y <= 1.8; y += 0.01) {
+                                                double x = radius * Math.cos(y * 50.0);
+                                                double z = radius * Math.sin(y * 50.0);
+                                                p.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, (double)((float)(loc.getX() + x)), (double)((float)(loc.getY() + y)), (double)((float)(loc.getZ() + z)), 0, 0.0, 0.0, 0.0, 1.0);
+                                            }
+
+                                            ++this.runs;
+                                        }
+                                    }
+                                }).runTaskTimerAsynchronously(FrostLife.getInstance(), 0L, 1L);
+                                p.sendTitle(Messages.GIVE_LIFE_RECEIVED_TITLE.message(), "", 15, 50, 18);
+                                LifeManager.setLife(p, FrostLife.lives.get(p.getUniqueId()) + 1);
+                            }
+                        }).runTaskLater(FrostLife.getInstance(), 40L);
+                    }
                     return true;
                 }
 

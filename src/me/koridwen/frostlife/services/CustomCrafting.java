@@ -13,7 +13,7 @@ public class CustomCrafting {
     private static boolean isNametagTweaked = true;
     private static boolean isTNTTweaked = true;
     private static boolean isSaddleTweaked = true;
-    private static boolean isSporeTweaked = true;
+    private static boolean isSporeTweaked = false;
 
     public CustomCrafting() {
     }
@@ -49,6 +49,11 @@ public class CustomCrafting {
         Bukkit.getServer().addRecipe(getSnowRecipe());
         if (isNametagTweaked) {
             Bukkit.getServer().addRecipe(getNameTagRecipe());
+            Bukkit.getServer().addRecipe(getNameTagRecipe2());
+            Bukkit.getServer().addRecipe(getNameTagRecipe3());
+            Bukkit.getServer().addRecipe(getNameTagRecipe4());
+            Bukkit.getServer().addRecipe(getNameTagRecipe5());
+            Bukkit.getServer().addRecipe(getNameTagRecipe6());
         }
 
         if (isTNTTweaked) {
@@ -57,6 +62,7 @@ public class CustomCrafting {
 
         if (isSaddleTweaked) {
             Bukkit.getServer().addRecipe(getSaddleRecipe());
+            Bukkit.getServer().addRecipe(getSaddleRecipe2());
         }
 
         if ((Bukkit.getServer().getVersion().contains("1.17") || Bukkit.getServer().getVersion().contains("1.18") || Bukkit.getServer().getVersion().contains("1.19")) && isSporeTweaked) {
@@ -81,7 +87,52 @@ public class CustomCrafting {
         NamespacedKey key = new NamespacedKey(FrostLife.getInstance(), "nametag");
         ItemStack item = new ItemStack(Material.NAME_TAG);
         ShapedRecipe recipe = new ShapedRecipe(key, item);
-        recipe.shape(new String[]{"   ", " S ", " P "});
+        recipe.shape("   ", " S ", " P ");
+        recipe.setIngredient('S', Material.STRING);
+        recipe.setIngredient('P', Material.PAPER);
+        return recipe;
+    }
+    private static ShapedRecipe getNameTagRecipe2() {
+        NamespacedKey key = new NamespacedKey(FrostLife.getInstance(), "nametag2");
+        ItemStack item = new ItemStack(Material.NAME_TAG);
+        ShapedRecipe recipe = new ShapedRecipe(key, item);
+        recipe.shape(" S ", " P ", "   ");
+        recipe.setIngredient('S', Material.STRING);
+        recipe.setIngredient('P', Material.PAPER);
+        return recipe;
+    }
+    private static ShapedRecipe getNameTagRecipe3() {
+        NamespacedKey key = new NamespacedKey(FrostLife.getInstance(), "nametag3");
+        ItemStack item = new ItemStack(Material.NAME_TAG);
+        ShapedRecipe recipe = new ShapedRecipe(key, item);
+        recipe.shape("   ", "S  ", "P  ");
+        recipe.setIngredient('S', Material.STRING);
+        recipe.setIngredient('P', Material.PAPER);
+        return recipe;
+    }
+    private static ShapedRecipe getNameTagRecipe4() {
+        NamespacedKey key = new NamespacedKey(FrostLife.getInstance(), "nametag4");
+        ItemStack item = new ItemStack(Material.NAME_TAG);
+        ShapedRecipe recipe = new ShapedRecipe(key, item);
+        recipe.shape("S  ", "P  ", "   ");
+        recipe.setIngredient('S', Material.STRING);
+        recipe.setIngredient('P', Material.PAPER);
+        return recipe;
+    }
+    private static ShapedRecipe getNameTagRecipe5() {
+        NamespacedKey key = new NamespacedKey(FrostLife.getInstance(), "nametag5");
+        ItemStack item = new ItemStack(Material.NAME_TAG);
+        ShapedRecipe recipe = new ShapedRecipe(key, item);
+        recipe.shape("   ", "  S", "  P");
+        recipe.setIngredient('S', Material.STRING);
+        recipe.setIngredient('P', Material.PAPER);
+        return recipe;
+    }
+    private static ShapedRecipe getNameTagRecipe6() {
+        NamespacedKey key = new NamespacedKey(FrostLife.getInstance(), "nametag6");
+        ItemStack item = new ItemStack(Material.NAME_TAG);
+        ShapedRecipe recipe = new ShapedRecipe(key, item);
+        recipe.shape("  S", "  P", "   ");
         recipe.setIngredient('S', Material.STRING);
         recipe.setIngredient('P', Material.PAPER);
         return recipe;
@@ -121,7 +172,15 @@ public class CustomCrafting {
         NamespacedKey key = new NamespacedKey(FrostLife.getInstance(), "saddle");
         ItemStack item = new ItemStack(Material.SADDLE);
         ShapedRecipe recipe = new ShapedRecipe(key, item);
-        recipe.shape(new String[]{"   ", " L ", "L L"});
+        recipe.shape("   ", " L ", "L L");
+        recipe.setIngredient('L', Material.LEATHER);
+        return recipe;
+    }
+    private static ShapedRecipe getSaddleRecipe2() {
+        NamespacedKey key = new NamespacedKey(FrostLife.getInstance(), "saddle2");
+        ItemStack item = new ItemStack(Material.SADDLE);
+        ShapedRecipe recipe = new ShapedRecipe(key, item);
+        recipe.shape(" L ", "L L", "   ");
         recipe.setIngredient('L', Material.LEATHER);
         return recipe;
     }

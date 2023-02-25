@@ -3,6 +3,9 @@ package me.koridwen.frostlife;
 import me.koridwen.frostlife.commands.*;
 import me.koridwen.frostlife.listeners.*;
 import me.koridwen.frostlife.services.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.UUID;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -151,6 +154,7 @@ public class FrostLife extends JavaPlugin {
         frostbitten=null;
         sessionsRun++;
         //attributing lives & explanations
+        NamespacedKey[] recipes = {NamespacedKey.fromString("nametag"),NamespacedKey.fromString("saddle"),NamespacedKey.fromString("tnt"),NamespacedKey.fromString("snow")};
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (!explanations.containsKey(p.getUniqueId()))
                 explanations.put(p.getUniqueId(), true);
@@ -158,6 +162,7 @@ public class FrostLife extends JavaPlugin {
                 if (!p.hasPermission("frostlife.bypass")) {
                     LifeManager.setPlayerToRandomLife(p);
                     explanations.put(p.getUniqueId(), true);
+                    p.discoverRecipes(Arrays.asList(recipes));
                 }
             }
         }

@@ -17,7 +17,6 @@ public class OnPlayerJoin implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent evt) {
         final Player p = evt.getPlayer();
-        Bukkit.broadcastMessage("test1");
         if (!FrostLife.lives.containsKey(p.getUniqueId())) {
             (new BukkitRunnable() {
                 public void run() {
@@ -36,10 +35,7 @@ public class OnPlayerJoin implements Listener {
         }
         //if (p.getUniqueId() == FrostLife.frostbitten) {
             if (p.getUniqueId()==FrostLife.frostbitten)
-                Bukkit.broadcastMessage("test2");
             if (FrostbiteManager.waitingToStrike) {
-
-                Bukkit.broadcastMessage("test3");
                 (new BukkitRunnable() {
                     public void run() {
                         FrostbiteManager.strikeCurse();
